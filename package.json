@@ -1,0 +1,18 @@
+{
+  "name": "review-cadence",
+  "version": "0.1.0",
+  "description": "SM-2 spaced-repetition scheduler for a local deck of flashcards",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "cadence": "./dist/main.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
