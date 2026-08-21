@@ -53,9 +53,19 @@ $ cadence due --json
     "repetitions": 0,
     "easeFactor": 2.5,
     "dueDate": "2026-08-21T09:00:00.000Z",
-    "lastReviewed": null
+    "lastReviewed": null,
+    "totalReviews": 0,
+    "correctReviews": 0
   }
 ]
+```
+
+`totalReviews` and `correctReviews` (grade >= 3) accumulate across the
+card's life and feed the `stats` command:
+
+```
+$ cadence stats
+12 cards, 40 reviews, 33 correct (82.5% retention)
 ```
 
 ### Commands
@@ -65,6 +75,7 @@ $ cadence due --json
 - `list` - show every card in the deck
 - `due [--on <date>]` - show cards due by now, or by the given date
 - `review <id> <grade 0-5>` - record a review and reschedule the card
+- `stats` - show review counts and overall retention rate
 
 All commands accept `--file <path>` to use a deck file other than the
 default, and `--json` to switch output modes.

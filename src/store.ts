@@ -9,6 +9,8 @@ export interface Card {
   easeFactor: number
   dueDate: string
   lastReviewed: string | null
+  totalReviews: number
+  correctReviews: number
 }
 
 export interface Deck {
@@ -20,7 +22,13 @@ export function loadDeck(path: string): Deck {
     throw new Error(`no deck file at ${path} - run "init" first`)
   }
   const raw = readFileSync(path, 'utf8')
-  return JSON.parse(raw) as Deck
+  const deck = JSON.parse(raw) as Deck
+  // decks written before totalReviews/correctReviews existed don't have them
+  for (const card of deck.cards) {
+    card.totalReviews ??= 0
+    card.correctReviews ??= 0
+  }
+  return deck
 }
 
 export function saveDeck(path: string, deck: Deck): void {

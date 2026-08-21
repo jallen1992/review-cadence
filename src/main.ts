@@ -72,6 +72,8 @@ function main(): void {
         easeFactor: 2.5,
         dueDate: now,
         lastReviewed: null,
+        totalReviews: 0,
+        correctReviews: 0,
       }
       deck.cards.push(card)
       saveDeck(file, deck)
@@ -117,6 +119,8 @@ function main(): void {
       card.repetitions = next.repetitions
       card.easeFactor = next.easeFactor
       card.lastReviewed = now.toISOString()
+      card.totalReviews += 1
+      if (grade >= 3) card.correctReviews += 1
       const due = new Date(now)
       due.setDate(due.getDate() + next.interval)
       card.dueDate = due.toISOString()
@@ -130,8 +134,22 @@ function main(): void {
       break
     }
 
+    case 'stats': {
+      const deck = loadDeck(file)
+      const totalReviews = deck.cards.reduce((sum, c) => sum + c.totalReviews, 0)
+      const correctReviews = deck.cards.reduce((sum, c) => sum + c.correctReviews, 0)
+      const retentionRate = totalReviews === 0 ? null : correctReviews / totalReviews
+      const data = { cardCount: deck.cards.length, totalReviews, correctReviews, retentionRate }
+      const human =
+        totalReviews === 0
+          ? `${deck.cards.length} cards, no reviews yet`
+          : `${deck.cards.length} cards, ${totalReviews} reviews, ${correctReviews} correct (${(retentionRate! * 100).toFixed(1)}% retention)`
+      printResult(asJson, data, human)
+      break
+    }
+
     default:
-      fail(`unknown command "${command ?? ''}"\nusage: cadence <init|add|list|due|review> [args] [--file path] [--json]`)
+      fail(`unknown command "${command ?? ''}"\nusage: cadence <init|add|list|due|review|stats> [args] [--file path] [--json]`)
   }
 }
 
