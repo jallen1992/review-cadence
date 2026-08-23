@@ -19,7 +19,14 @@ if you want that, a full app like Anki is a better fit.
 ## Usage
 
 Everything lives in `.cadence-deck.json` in the current directory, unless
-you pass `--file <path>`.
+you pass `--file <path>` or `--deck <name>`.
+
+`--deck <name>` is a shorthand for keeping several decks side by side, say
+one per language or subject: `--deck spanish` reads and writes
+`.cadence-spanish.json`. Deck names are limited to letters, numbers, `-`
+and `_`. Use `--file` instead when you want to point at a path outside
+the current directory or with a different name; `--file` and `--deck`
+can't both be given.
 
 ```
 $ cadence init
@@ -77,8 +84,8 @@ $ cadence stats
 - `review <id> <grade 0-5>` - record a review and reschedule the card
 - `stats` - show review counts and overall retention rate
 
-All commands accept `--file <path>` to use a deck file other than the
-default, and `--json` to switch output modes.
+All commands accept `--file <path>` or `--deck <name>` to use a deck file
+other than the default, and `--json` to switch output modes.
 
 ## Building
 

@@ -36,6 +36,21 @@ function fail(message: string): never {
   process.exit(1)
 }
 
+// deck names become filenames, so keep them to characters that are safe
+// on every filesystem and can't be read as a path (e.g. "../secrets")
+const DECK_NAME_PATTERN = /^[a-zA-Z0-9_-]+$/
+
+function resolveFile(flags: Record<string, string | boolean>): string {
+  const explicitFile = typeof flags.file === 'string' ? flags.file : undefined
+  const deckName = typeof flags.deck === 'string' ? flags.deck : undefined
+  if (explicitFile && deckName) fail('pass either --file or --deck, not both')
+  if (deckName) {
+    if (!DECK_NAME_PATTERN.test(deckName)) fail('deck name may only contain letters, numbers, "-" and "_"')
+    return `.cadence-${deckName}.json`
+  }
+  return explicitFile ?? DEFAULT_FILE
+}
+
 function printResult(asJson: boolean, data: unknown, human: string): void {
   if (asJson) {
     process.stdout.write(JSON.stringify(data, null, 2) + '\n')
@@ -47,7 +62,7 @@ function printResult(asJson: boolean, data: unknown, human: string): void {
 function main(): void {
   const [command, ...rest] = process.argv.slice(2)
   const { positional, flags } = parseFlags(rest)
-  const file = typeof flags.file === 'string' ? flags.file : DEFAULT_FILE
+  const file = resolveFile(flags)
   const asJson = flags.json === true
 
   switch (command) {
