@@ -46,6 +46,16 @@ Grades follow the SM-2 scale: 0-2 means you didn't recall it (interval
 resets to a day), 3-5 means you did, with 5 being "trivially easy" and
 3 being "recalled with real effort."
 
+Fat-fingered a grade? `cadence undo` puts the card back the way it was
+before the most recent `review`, including its ease factor and review
+counts. It only remembers one step back - reviewing another card, or
+running `undo` itself, clears it.
+
+```
+$ cadence undo
+undid last review of card 3f2a9e1c-8b7d-4c3a-9e2b-1a4f6d8c0b3e, back to interval 0d, ease 2.50
+```
+
 Every command accepts `--json` for machine-readable output instead of
 the human-readable text above:
 
@@ -82,6 +92,7 @@ $ cadence stats
 - `list` - show every card in the deck
 - `due [--on <date>]` - show cards due by now, or by the given date
 - `review <id> <grade 0-5>` - record a review and reschedule the card
+- `undo` - revert the most recent review
 - `stats` - show review counts and overall retention rate
 
 All commands accept `--file <path>` or `--deck <name>` to use a deck file

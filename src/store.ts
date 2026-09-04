@@ -13,8 +13,22 @@ export interface Card {
   correctReviews: number
 }
 
+// enough of a card's prior state to put it back after a review, so
+// "undo" doesn't need a full history log - just the one step back
+export interface ReviewSnapshot {
+  cardId: string
+  interval: number
+  repetitions: number
+  easeFactor: number
+  dueDate: string
+  lastReviewed: string | null
+  totalReviews: number
+  correctReviews: number
+}
+
 export interface Deck {
   cards: Card[]
+  lastReview?: ReviewSnapshot
 }
 
 export function loadDeck(path: string): Deck {

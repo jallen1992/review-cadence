@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { randomUUID } from 'node:crypto'
-import { type Card, type Deck, loadDeck, saveDeck } from './store.js'
+import { type Card, type Deck, type ReviewSnapshot, loadDeck, saveDeck } from './store.js'
 import { nextSchedule } from './scheduler.js'
 
 const DEFAULT_FILE = '.cadence-deck.json'
@@ -125,6 +125,17 @@ function main(): void {
       const card = deck.cards.find((c) => c.id === id)
       if (!card) fail(`no card with id ${id}`)
 
+      const previous: ReviewSnapshot = {
+        cardId: card.id,
+        interval: card.interval,
+        repetitions: card.repetitions,
+        easeFactor: card.easeFactor,
+        dueDate: card.dueDate,
+        lastReviewed: card.lastReviewed,
+        totalReviews: card.totalReviews,
+        correctReviews: card.correctReviews,
+      }
+
       const now = new Date()
       const next = nextSchedule(
         { interval: card.interval, repetitions: card.repetitions, easeFactor: card.easeFactor },
@@ -139,12 +150,38 @@ function main(): void {
       const due = new Date(now)
       due.setDate(due.getDate() + next.interval)
       card.dueDate = due.toISOString()
+      deck.lastReview = previous
 
       saveDeck(file, deck)
       printResult(
         asJson,
         card,
         `card ${card.id} scheduled for ${card.dueDate} (interval ${card.interval}d, ease ${card.easeFactor.toFixed(2)})`,
+      )
+      break
+    }
+
+    case 'undo': {
+      const deck = loadDeck(file)
+      const snapshot = deck.lastReview
+      if (!snapshot) fail('nothing to undo')
+      const card = deck.cards.find((c) => c.id === snapshot.cardId)
+      if (!card) fail(`card ${snapshot.cardId} from the last review no longer exists`)
+
+      card.interval = snapshot.interval
+      card.repetitions = snapshot.repetitions
+      card.easeFactor = snapshot.easeFactor
+      card.dueDate = snapshot.dueDate
+      card.lastReviewed = snapshot.lastReviewed
+      card.totalReviews = snapshot.totalReviews
+      card.correctReviews = snapshot.correctReviews
+      delete deck.lastReview
+
+      saveDeck(file, deck)
+      printResult(
+        asJson,
+        card,
+        `undid last review of card ${card.id}, back to interval ${card.interval}d, ease ${card.easeFactor.toFixed(2)}`,
       )
       break
     }
@@ -164,7 +201,7 @@ function main(): void {
     }
 
     default:
-      fail(`unknown command "${command ?? ''}"\nusage: cadence <init|add|list|due|review|stats> [args] [--file path] [--json]`)
+      fail(`unknown command "${command ?? ''}"\nusage: cadence <init|add|list|due|review|undo|stats> [args] [--file path] [--json]`)
   }
 }
 
